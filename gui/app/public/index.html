@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>LaTex</title>
+    <style type="text/css" media="screen">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .error {
+            color: #800;
+            cursor: pointer;
+        }
+
+        button {
+            margin: 1em;
+            padding: .5em;
+        }
+
+        #menu {
+            height: 50px;
+            width: 100%;
+            line-height: 50px;
+        }
+
+        #editor-container {
+            position: absolute;
+            top: 50px;
+            bottom: 300px;
+            left: 0;
+            padding: 10px;
+            width: 50%;
+        }
+
+        #editor {
+            height: 100%;
+            width: 100%;
+        }
+
+        #log-container {
+            position: absolute;
+            height: 300px;
+            bottom: 0;
+            left: 0;
+            width: 50%;
+            padding: 10px;
+        }
+
+        #log {
+            border: 1px solid black;
+            height: 100%;
+            width: 100%;
+            padding: 5px;
+            overflow: auto;
+        }
+
+        #view {
+            position: absolute;
+            top: 50px;
+            bottom: 0;
+            left: 50%;
+            width: 50%;
+            padding: 10px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+<div id="menu">
+    <button onclick="last()">Last</button>
+    <button onclick="next()">Next</button>
+    <button onclick="setScaleFunc(scaleFit)">Scale fit</button>
+    <button onclick="setScaleFunc(scaleHeight)">Scale height</button>
+    <button onclick="setScaleFunc(scaleWidth)">Scale width</button>
+    <button onclick="zoomOut()">-</button>
+    <span id="zoom" style="display: inline-block; width: 3em; text-align: center">100%</span>
+    <button onclick="zoomIn()">+</button>
+    <a href="/doc/main.pdf?download">Download</a>
+</div>
+
+<div id="editor-container">
+    <div id="editor"></div>
+</div>
+
+<div id="log-container">
+    <div id="log"></div>
+</div>
+
+<div id="view">
+    <canvas id="pdf" style="position: absolute; margin: 10px; border: 1px solid black"></canvas>
+</div>
+
+<script src="../ace-builds/src/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="../ace-builds/src/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+<script src="../pdfjs-dist/build/pdf.combined.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    ace.require("ace/ext/language_tools");
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/clouds");
+    editor.getSession().setMode("ace/mode/latex");
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: false
+    });
+
+    fetch(new Request('/doc/main.tex'))
+            .then(res=>res.text())
+            .then(text=> {
+                editor.setValue(text);
+                editor.clearSelection();
+            });
+
+    var pageNum = 1;
+    var pdf, page;
+    var scaleFunc = scaleFit;
+    var scale = 1;
+    var elem = {
+        zoom: document.getElementById('zoom'),
+        log: document.getElementById('log'),
+        view: document.getElementById('view'),
+        canvas: document.getElementById('pdf'),
+    };
+    var renderContext = {
+        canvasContext: elem.canvas.getContext('2d'),
+        viewport: null
+    };
+
+    editor.commands.addCommand({
+        name: 'save',
+        bindKey: {win: 'Ctrl-S', mac: 'Command-S'},
+        exec: function (editor) {
+            var start = Date.now();
+            log.innerHTML = '';
+            fetch(new Request('/action/save', {method: 'POST', body: editor.getValue()}))
+                    .then(res=> {
+                        console.log(Date.now() - start);
+                        res.text().then(text=> {
+                            var errorPos = text.indexOf('\n./main.tex:');
+                            var firstLine;
+                            while (errorPos >= 0) {
+                                var line = parseInt(text.substring(errorPos + 12, text.indexOf(':', errorPos + 12)));
+                                var errorEnd = text.indexOf('\n', errorPos + 1);
+                                text = text.substring(0, errorPos + 1) +
+                                        '<span class="error" onclick="editor.gotoLine(' + line + '); editor.focus()">' + text.substring(errorPos + 1, errorEnd) + '</span>' +
+                                        text.substring(errorEnd);
+                                firstLine = firstLine || line;
+                                errorPos = text.indexOf('\n./main.tex:', errorEnd);
+                            }
+                            log.innerHTML = text.replace(/\n/g, '<br>');
+                            if (firstLine) {
+                                editor.gotoLine(firstLine);
+                                log.querySelector('.error').scrollIntoView();
+                            }
+                        });
+                        return PDFJS.getDocument('/doc/main.pdf');
+                    })
+                    .then(p=> {
+                        pdf = p;
+                        pageNum = Math.min(pageNum, pdf.numPages);
+                        renderPage();
+                    })
+            ;
+        }
+    });
+
+    window.onresize = renderPage;
+
+    function renderPage() {
+        pdf.getPage(pageNum).then(p=> {
+            page = p;
+            scaleFunc();
+            elem.canvas.width = renderContext.viewport.width;
+            elem.canvas.height = renderContext.viewport.height;
+            elem.canvas.style.left = Math.max(0, (viewWidth() - renderContext.viewport.width) / 2) + 'px';
+            elem.canvas.style.top = Math.max(0, (viewHeight() - renderContext.viewport.height) / 2) + 'px';
+            page.render(renderContext);
+        });
+    }
+
+    function scaleFit() {
+        var view = page.view;
+        setScale(Math.min(viewWidth() / view[2], viewHeight() / view[3]));
+    }
+
+    function scaleHeight() {
+        setScale(viewHeight() / page.view[3]);
+    }
+
+    function scaleWidth() {
+        setScale(viewWidth() / page.view[2]);
+    }
+
+    function viewWidth() {
+        var style = window.getComputedStyle(elem.view);
+        return elem.view.offsetWidth - parseInt(style.paddingLeft) - parseInt(style.paddingRight);
+    }
+    function viewHeight() {
+        var style = window.getComputedStyle(elem.view);
+        return elem.view.offsetHeight - parseInt(style.paddingTop) - parseInt(style.paddingBottom);
+    }
+
+    function setScale(s) {
+        scale = s;
+        elem.zoom.textContent = Math.round(s * 100) + "%";
+        renderContext.viewport = page.getViewport(scale);
+    }
+
+    function setScaleFunc(sf) {
+        scaleFunc = sf;
+        renderPage();
+    }
+
+    function zoomIn() {
+        setScale(scale * 1.2);
+        scaleFunc = ()=> {
+        };
+        renderPage();
+    }
+
+    function zoomOut() {
+        setScale(scale / 1.2);
+        scaleFunc = ()=> {
+        };
+        renderPage();
+    }
+
+    function last() {
+        if (pageNum > 1) {
+            pageNum--;
+            renderPage();
+        }
+    }
+
+    function next() {
+        if (pageNum < pdf.numPages) {
+            pageNum++;
+            renderPage()
+        }
+    }
+
+</script>
+</body>
+</html>

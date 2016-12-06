@@ -1,0 +1,14 @@
+version: '2'
+services:
+
+  gui:
+    image: latex-gui
+    ports:
+      - "80:3000"
+    volumes:
+      - .:/data
+
+  server:
+    image: latex-server
+    volumes:
+      - .:/data
