@@ -1,9 +1,12 @@
 {
-  "name": "latex",
-  "version": "0.0.0",
-  "private": true,
+  "name": "latex-gui",
+  "version": "0.0.1",
+  "private": false,
+  "docker-user": "nidi3",
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "docker-build": "npm install && docker-build",
+    "docker-push": "docker-push"
   },
   "dependencies": {
     "ace-builds": "^1.2.5",
@@ -16,5 +19,8 @@
     "pdfjs-dist": "^1.6.355",
     "request": "^2.79.0",
     "serve-favicon": "~2.3.0"
+  },
+  "devDependencies": {
+    "docker-build-run-push": "^3.0.0"
   }
 }

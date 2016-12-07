@@ -7,10 +7,10 @@ COPY *.sh /tmp/
 RUN chmod 777 /tmp/*.sh
 
 WORKDIR /usr/src/app
-COPY app/package.json /usr/src/app
+COPY package.json /usr/src/app
 RUN npm install
 
-COPY app /usr/src/app/
+COPY . /usr/src/app/
 
 VOLUME ["/data"]
 EXPOSE 3001
