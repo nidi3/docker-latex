@@ -5,7 +5,10 @@
   "docker-user": "nidi3",
   "scripts": {
     "start": "node ./bin/www",
-    "docker-build": "npm install && docker-build",
+    "devstart": "ENV=dev node ./bin/www",
+    "build": "webpack --config public/webpack.config.js",
+    "watch": "webpack --watch --config public/webpack.config.js",
+    "docker-build": "npm install && npm run build && docker-build",
     "docker-push": "docker-push"
   },
   "dependencies": {
@@ -17,10 +20,18 @@
     "morgan": "~1.7.0",
     "node-sass-middleware": "0.9.8",
     "pdfjs-dist": "^1.6.355",
+    "redux": "^3.6.0",
+    "redux-watch": "^1.1.1",
     "request": "^2.79.0",
     "serve-favicon": "~2.3.0"
   },
   "devDependencies": {
-    "docker-build-run-push": "^3.0.0"
+    "babel-core": "^6.20.0",
+    "babel-loader": "^6.2.9",
+    "babel-preset-es2015": "^6.18.0",
+    "css-loader": "^0.26.1",
+    "docker-build-run-push": "^3.0.0",
+    "style-loader": "^0.13.1",
+    "webpack": "^1.14.0"
   }
 }

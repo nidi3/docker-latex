@@ -10,5 +10,7 @@ services:
 
   server:
     image: latex-server
+    ports:
+      - "3001:3001"
     volumes:
       - .:/data

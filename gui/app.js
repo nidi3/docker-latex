@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var save = require('./routes/save');
+var config = require('./config');
 
 var app = express();
 
@@ -24,7 +25,7 @@ app.use(require('node-sass-middleware')({
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'node_modules')));
-app.use('/doc', express.static('/data'));
+app.use('/doc', express.static(config.dir));
 
 app.use('/action', save);
 
