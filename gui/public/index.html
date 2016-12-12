@@ -25,14 +25,14 @@
 </head>
 <body>
 <div id="menu">
-    <button onclick="app.last()">Last</button>
-    <button onclick="app.next()">Next</button>
-    <button onclick="app.scale('page')">Scale fit</button>
-    <button onclick="app.scale('height')">Scale height</button>
-    <button onclick="app.scale('width')">Scale width</button>
-    <button onclick="app.zoomOut()">-</button>
+    <button onclick="app.view.lastPage()">Last</button>
+    <button onclick="app.view.nextPage()">Next</button>
+    <button onclick="app.view.scale('page')">Scale fit</button>
+    <button onclick="app.view.scale('height')">Scale height</button>
+    <button onclick="app.view.scale('width')">Scale width</button>
+    <button onclick="app.view.zoomOut()">-</button>
     <span id="zoom" style="display: inline-block; width: 3em; text-align: center">100%</span>
-    <button onclick="app.zoomIn()">+</button>
+    <button onclick="app.view.zoomIn()">+</button>
     <a href="/doc/main.pdf?download">Download</a>
 </div>
 
@@ -45,7 +45,7 @@
 </div>
 
 <div id="view">
-    <canvas id="pdf" style="position: absolute; margin: 10px; border: 1px solid black"></canvas>
+    <canvas id="pdf"></canvas>
 </div>
 
 <script src="../ace-builds/src/ace.js" type="text/javascript" charset="utf-8"></script>

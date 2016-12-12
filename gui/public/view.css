@@ -1,0 +1,26 @@
+button {
+    margin: 1em;
+    padding: .5em;
+}
+
+#menu {
+    height: 50px;
+    width: 100%;
+    line-height: 50px;
+}
+
+#view {
+    position: absolute;
+    top: 50px;
+    bottom: 0;
+    left: 50%;
+    width: 50%;
+    padding: 10px;
+    overflow: auto;
+}
+
+#pdf {
+    position: absolute;
+    margin: 10px;
+    border: 1px solid black;
+}

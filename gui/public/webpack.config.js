@@ -6,9 +6,10 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'pack.js',
-        library:'app',
-        libraryTarget:'var'
+        library: 'app',
+        libraryTarget: 'var'
     },
+    devtool: 'eval',
     resolve: {
         modules: [
             'node_modules'

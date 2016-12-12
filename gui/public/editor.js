@@ -1,3 +1,5 @@
+require('./editor.css');
+
 const langTools = ace.require("ace/ext/language_tools");
 const TokenIterator = ace.require("ace/token_iterator").TokenIterator;
 const editor = ace.edit("editor");
@@ -8,13 +10,6 @@ editor.setOptions({
     enableSnippets: true,
     enableLiveAutocompletion: false
 });
-
-fetch(new Request('/doc/main.tex'))
-    .then(res => res.text())
-    .then(text => {
-        editor.setValue(text);
-        editor.clearSelection();
-    });
 
 const texinfo = 'http://mirror.switch.ch/ftp/mirror/tex/info/latex2e-help-texinfo/latex2e.html';
 const help = {
@@ -267,6 +262,10 @@ editor.commands.addCommand({
 
 
 module.exports = {
+    set:function(text){
+        editor.setValue(text);
+        editor.clearSelection();
+    },
     beforeSave: function (f) {
         callback.beforeSave = f;
     },

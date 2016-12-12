@@ -10,7 +10,6 @@ var config = require('./config');
 
 var app = express();
 
-// app.use(favicon(path.join(__dirname, 'public', 'favicon.png')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.text());
