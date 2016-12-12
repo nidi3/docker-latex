@@ -1,11 +1,12 @@
 import Editor from "./editor";
-import view from "./view";
+import View from "./view";
 import Log from "./log";
 
 require('./app.css');
 
 const log = Log.find()[0];
 const editor = Editor.find()[0];
+const view = View.find()[0];
 
 log.onError = editor.gotoLine.bind(editor);
 log.onErrorClick = editor.gotoLine.bind(editor);
@@ -22,7 +23,3 @@ fetch(new Request('/doc/main.tex'))
         editor.set(text);
         editor.save();
     });
-
-module.exports = {
-    view: view
-};

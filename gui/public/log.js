@@ -1,13 +1,12 @@
 require('./log.scss');
+import {nop, defineElement} from "./util";
 
 class Log extends HTMLElement {
 
     constructor() {
         super();
-        this.onError = () => {
-        };
-        this.onErrorClick = () => {
-        };
+        this.onError = nop;
+        this.onErrorClick = nop;
         this.innerHTML = '<div id="container"><div id="log"></div></div>';
         this.log = this.querySelector('#log');
     }
@@ -33,10 +32,4 @@ class Log extends HTMLElement {
     }
 }
 
-customElements.define('latex-log', Log);
-
-module.exports = {
-    find: function () {
-        return document.getElementsByTagName('latex-log');
-    }
-};
+module.exports = defineElement('latex-log', Log);

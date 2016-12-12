@@ -1,14 +1,13 @@
 import editorHelp from "./editor-help";
-
+import {nop, defineElement} from "./util";
+const Range = ace.require('ace/range').Range;
 require('./editor.scss');
 
 class Editor extends HTMLElement {
     constructor() {
         super();
-        this.onBeforeSave = () => {
-        };
-        this.onAfterSave = () => {
-        };
+        this.onBeforeSave = nop;
+        this.onAfterSave = nop;
         this.innerHTML = '<div id="container"><div id="editor"></div></div>';
         this.editor = ace.edit("editor");
         this.init(this.editor);
@@ -90,17 +89,10 @@ class Editor extends HTMLElement {
         const row = Math.floor((e.y + renderer.scrollTop - canvasPos.top) / renderer.lineHeight);
         const col = Math.round(offset);
         const screenPos = {row: row, column: col, side: offset - col > 0 ? 1 : -1};
-        const session = editor.session;
-        return session.screenToDocumentPosition(screenPos.row, screenPos.column);
+        return this.editor.session.screenToDocumentPosition(screenPos.row, screenPos.column);
     }
 
 }
 
-customElements.define('latex-editor', Editor);
-
-module.exports = {
-    find: function () {
-        return document.getElementsByTagName('latex-editor');
-    }
-};
+module.exports = defineElement('latex-editor', Editor);
 

@@ -24,24 +24,10 @@
     <meta name="msapplication-square310x310logo" content="images/mstile-310x310.png" />
 </head>
 <body>
-<div id="menu">
-    <button onclick="app.view.lastPage()">Last</button>
-    <button onclick="app.view.nextPage()">Next</button>
-    <button onclick="app.view.scale('page')">Scale fit</button>
-    <button onclick="app.view.scale('height')">Scale height</button>
-    <button onclick="app.view.scale('width')">Scale width</button>
-    <button onclick="app.view.zoomOut()">-</button>
-    <span id="zoom" style="display: inline-block; width: 3em; text-align: center">100%</span>
-    <button onclick="app.view.zoomIn()">+</button>
-    <a href="/doc/main.pdf?download">Download</a>
-</div>
-
+<latex-view-controls></latex-view-controls>
 <latex-editor></latex-editor>
 <latex-log></latex-log>
-
-<div id="view">
-    <canvas id="pdf"></canvas>
-</div>
+<latex-view></latex-view>
 
 <script src="../ace-builds/src/ace.js" type="text/javascript" charset="utf-8"></script>
 <script src="../ace-builds/src/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
