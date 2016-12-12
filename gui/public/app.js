@@ -1,25 +1,27 @@
-import editor from "./editor";
-import log from "./log";
+import Editor from "./editor";
 import view from "./view";
+import Log from "./log";
 
 require('./app.css');
 
-log.onError(editor.gotoLine);
-log.onErrorClick(editor.gotoLine);
+const log = Log.find()[0];
+const editor = Editor.find()[0];
 
-editor.beforeSave(() => log.set(''));
-editor.afterSave(text => {
+log.onError = editor.gotoLine.bind(editor);
+log.onErrorClick = editor.gotoLine.bind(editor);
+
+editor.onBeforeSave = () => log.set('');
+editor.onAfterSave = text => {
     log.set(text);
     view.load();
-});
+};
 
 fetch(new Request('/doc/main.tex'))
     .then(res => res.text())
     .then(text => {
         editor.set(text);
-        view.load();
+        editor.save();
     });
-
 
 module.exports = {
     view: view

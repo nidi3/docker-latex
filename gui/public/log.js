@@ -1,22 +1,18 @@
-require('./log.css');
+require('./log.scss');
 
-const log = document.getElementById('log');
+class Log extends HTMLElement {
 
-const callback = {
-    error: () => {
-    },
-    errorClick: () => {
+    constructor() {
+        super();
+        this.onError = () => {
+        };
+        this.onErrorClick = () => {
+        };
+        this.innerHTML = '<div id="container"><div id="log"></div></div>';
+        this.log = this.querySelector('#log');
     }
-};
 
-module.exports = {
-    onError: function (f) {
-        callback.error = f;
-    },
-    onErrorClick: function (f) {
-        callback.errorClick = f;
-    },
-    set: function (text) {
+    set(text) {
         let errorPos = text.indexOf('\n./main.tex:');
         let firstLine;
         while (errorPos >= 0) {
@@ -28,11 +24,19 @@ module.exports = {
             firstLine = firstLine || line;
             errorPos = text.indexOf('\n./main.tex:', errorEnd);
         }
-        log.innerHTML = text.replace(/\n/g, '<br>');
-        log.querySelectorAll('.error').forEach(e => e.onclick = () => callback.errorClick(e.getAttribute('data-line')));
+        this.log.innerHTML = text.replace(/\n/g, '<br>');
+        this.log.querySelectorAll('.error').forEach(e => e.onclick = () => this.onErrorClick(e.getAttribute('data-line')));
         if (firstLine) {
-            callback.error(firstLine);
-            log.querySelector('.error').scrollIntoView();
+            this.onError(firstLine);
+            this.log.querySelector('.error').scrollIntoView();
         }
+    }
+}
+
+customElements.define('latex-log', Log);
+
+module.exports = {
+    find: function () {
+        return document.getElementsByTagName('latex-log');
     }
 };

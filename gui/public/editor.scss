@@ -1,19 +1,21 @@
-#editor-container {
+latex-editor {
+  #container {
     position: absolute;
     top: 50px;
     bottom: 300px;
     left: 0;
     padding: 10px;
     width: 50%;
-}
+  }
 
-#editor {
+  #editor {
     height: 100%;
     width: 100%;
-}
+  }
 
-.ace_linkable {
+  .ace_linkable {
     position: absolute;
     background-color: blue;
     opacity: .2;
+  }
 }
