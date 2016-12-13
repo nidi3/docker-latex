@@ -150,7 +150,7 @@ const help = {
     '\\vspace': {help: texinfo + '#g_t_005cvspace', type: 'command'},
 };
 
-const completer = {
+export const completer = {
     getCompletions: (editor, session, pos, prefix, callback) => {
         const token = editor.session.getTokenAt(pos.row, pos.column);
         const lastToken = editor.session.getTokenAt(pos.row, pos.column - prefix.length - 1);
@@ -180,15 +180,10 @@ const completer = {
     }
 };
 
-function tokenLink(token) {
+export function tokenLink(token) {
     if (token && (token.type === 'keyword' || token.type === 'storage.type' || token.type === 'variable.parameter')) {
         const h = help[token.value];
         return h && h.help;
     }
     return false;
 }
-
-module.exports = {
-    completer: completer,
-    tokenLink: tokenLink
-};

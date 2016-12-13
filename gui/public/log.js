@@ -32,4 +32,4 @@ class Log extends HTMLElement {
     }
 }
 
-module.exports = defineElement('latex-log', Log);
+export default defineElement('latex-log', Log);

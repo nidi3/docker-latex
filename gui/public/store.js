@@ -5,21 +5,21 @@ let initState = {
     scale: 'page'
 };
 
-let store = createStore(function (state = initState, action) {
+export default createStore(function (state = initState, action) {
     switch (action.type) {
     case 'prev.page':
         return Object.assign({}, state, {pageNum: state.pageNum - 1});
     case 'next.page':
         return Object.assign({}, state, {pageNum: state.pageNum + 1});
-    case 'set.page':
-        return Object.assign({}, state, {pageNum: action.page});
-    case 'scale':
-        return Object.assign({}, state, {scale: action.value});
-    case 'pdf':
+    case 'set.pageNum':
+        return Object.assign({}, state, {pageNum: action.pageNum});
+    case 'set.scale':
+        return Object.assign({}, state, {scale: action.scale});
+    case 'set.pdf':
         return Object.assign({}, state, {pdf: action.pdf});
+    case 'set.page':
+        return Object.assign({}, state, {page: action.page});
     default:
         return state;
     }
 });
-
-module.exports = store;

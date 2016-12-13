@@ -1,4 +1,4 @@
-import editorHelp from "./editor-help";
+import {completer,tokenLink} from "./editor-help";
 import {nop, defineElement} from "./util";
 const Range = ace.require('ace/range').Range;
 require('./editor.scss');
@@ -39,7 +39,7 @@ class Editor extends HTMLElement {
         });
 
         const langTools = ace.require("ace/ext/language_tools");
-        langTools.addCompleter(editorHelp.completer);
+        langTools.addCompleter(completer);
 
         const Range = ace.require("ace/range").Range;
         editor.on('click', e => {
@@ -71,7 +71,7 @@ class Editor extends HTMLElement {
             const pos = this.mousePos(e);
             const session = this.editor.session;
             const token = session.getTokenAt(pos.row, pos.column);
-            if (editorHelp.tokenLink(token)) {
+            if (tokenLink(token)) {
                 session.removeMarker(this.markerId);
                 this.editor.renderer.setCursorStyle("pointer");
                 const range = new Range(pos.row, token.start, pos.row, token.start + token.value.length);
@@ -91,8 +91,7 @@ class Editor extends HTMLElement {
         const screenPos = {row: row, column: col, side: offset - col > 0 ? 1 : -1};
         return this.editor.session.screenToDocumentPosition(screenPos.row, screenPos.column);
     }
-
 }
 
-module.exports = defineElement('latex-editor', Editor);
+export default defineElement('latex-editor', Editor);
 

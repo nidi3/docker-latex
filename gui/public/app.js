@@ -1,12 +1,12 @@
-import Editor from "./editor";
-import View from "./view";
-import Log from "./log";
+import editors from "./editor";
+import views from "./view";
+import logs from "./log";
 
 require('./app.css');
 
-const log = Log.find()[0];
-const editor = Editor.find()[0];
-const view = View.find()[0];
+const log = logs.find()[0];
+const editor = editors.find()[0];
+const view = views.find()[0];
 
 log.onError = editor.gotoLine.bind(editor);
 log.onErrorClick = editor.gotoLine.bind(editor);

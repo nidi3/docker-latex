@@ -1,5 +1,6 @@
 import {nop} from "./util";
-function compile(store, target, html) {
+
+export default function compile(store, target, html) {
     const texts = [];
 
     target.innerHTML = html;
@@ -51,7 +52,3 @@ function parseHandlers(node, bindings) {
         }
     }
 }
-
-module.exports = {
-    compile: compile
-};

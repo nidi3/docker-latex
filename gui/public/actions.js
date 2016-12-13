@@ -7,7 +7,15 @@ export function lastPage() {
 }
 
 export function scale(s) {
-    return {type: 'scale', value: s};
+    return {type: 'set.scale', scale: s};
+}
+
+export function setPageNum(page) {
+    return {type: 'set.pageNum', pageNum: page};
+}
+
+export function setPdf(pdf) {
+    return {type: 'set.pdf', pdf: pdf};
 }
 
 export function setPage(page) {

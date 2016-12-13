@@ -1,9 +1,8 @@
 import {PDFJS} from "pdfjs-dist/build/pdf.combined.js";
-import {defineElement} from "./util";
-import {nextPage, lastPage, scale, setPage} from "./actions";
-import {compile} from "./template";
+import {defineElement, observeStore} from "./util";
+import {nextPage, lastPage, scale, setPageNum, setPdf, setPage} from "./actions";
+import compile from "./template";
 import store from "./store";
-import watch from "redux-watch";
 
 require('./view.scss');
 
@@ -13,31 +12,30 @@ class View extends HTMLElement {
         compile(store, this, '<div id="view"><canvas id="pdf"></canvas></div>');
         this.view = this.querySelector('#view');
         this.canvas = this.querySelector('#pdf');
-        window.onresize = this.renderPage;
-        store.subscribe(watch(store.getState, 'pageNum')((value, old) => {
-            this.renderPage();
-        }));
-
-        store.subscribe(watch(store.getState, 'scale')((value, old) => {
-            this.renderPage();
-        }));
+        window.onresize = () => this.renderPage(this.props.page, this.props.scale);
+        observeStore(store, state => [state.pdf, state.pageNum], (pdfAndPageNum) => this.getPage(...pdfAndPageNum));
+        observeStore(store, state => [state.page, state.scale], (pageAndScale) => this.renderPage(...pageAndScale));
     }
 
     mapStateToProps(state) {
         return {
             pageNum: state.pageNum,
             scale: state.scale,
-            pdf: state.pdf
+            pdf: state.pdf,
+            page: state.page,
         };
     }
 
     mapDispatchToProps(dispatch) {
         return {
-            loaded: (pdf) => {
-                dispatch({type: 'pdf', pdf: pdf});
+            gotPdf: (pdf) => {
+                dispatch(setPdf(pdf));
                 if (this.props.pageNum > pdf.numPages) {
-                    dispatch(setPage(pdf.numPages));
+                    dispatch(setPageNum(pdf.numPages));
                 }
+            },
+            gotPage: (page) => {
+                dispatch(setPage(page));
             }
         };
     }
@@ -56,10 +54,10 @@ class View extends HTMLElement {
         if (typeof scale === 'number') {
             return scale;
         }
-        if (!this.page) {
+        if (!this.props.page) {
             return 1;
         }
-        const view = this.page.view;
+        const view = this.props.page.view;
         switch (scale) {
         case 'page':
             return Math.min(this.viewWidth() / view[2], this.viewHeight() / view[3]);
@@ -70,24 +68,26 @@ class View extends HTMLElement {
         }
     }
 
-    renderPage() {
-        this.props.pdf.getPage(this.props.pageNum).then(p => {
-            this.page = p;
-            const factor = this.calcScale(this.props.scale);
-            const viewport = this.page.getViewport(factor);
+    getPage(pdf, pageNum) {
+        if (pdf) {
+            pdf.getPage(pageNum).then(this.dispatch.gotPage);
+        }
+    }
+
+    renderPage(page, scale) {
+        if (page) {
+            const factor = this.calcScale(scale);
+            const viewport = page.getViewport(factor);
             this.canvas.width = viewport.width;
             this.canvas.height = viewport.height;
             this.canvas.style.left = Math.max(0, (this.viewWidth() - viewport.width) / 2) + 'px';
             this.canvas.style.top = Math.max(0, (this.viewHeight() - viewport.height) / 2) + 'px';
-            this.page.render({canvasContext: this.canvas.getContext('2d'), viewport: viewport});
-        });
+            page.render({canvasContext: this.canvas.getContext('2d'), viewport: viewport});
+        }
     }
 
     load() {
-        PDFJS.getDocument('/doc/main.pdf').then(pdf => {
-            this.dispatch.loaded(pdf);
-            this.renderPage();
-        });
+        PDFJS.getDocument('/doc/main.pdf').then(this.dispatch.gotPdf);
     }
 }
 
@@ -108,7 +108,7 @@ class ViewControls extends HTMLElement {
 </div>
 `);
         document.addEventListener('DOMContentLoaded', () => {
-            this.view = module.exports.find()[0];
+            this.view = view.find()[0];
         });
     }
 
@@ -139,8 +139,8 @@ class ViewControls extends HTMLElement {
 }
 
 defineElement('latex-view-controls', ViewControls);
-
-module.exports = defineElement('latex-view', View);
+const view = defineElement('latex-view', View);
+export default view;
 
 
 
