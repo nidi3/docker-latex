@@ -26,6 +26,7 @@ const help = {
                 }
             }
 
+            //TODO support nested begin/end
             function findEnvToEnd(row, column) {
                 let iter = new TokenIterator(session, row, column);
                 let token;

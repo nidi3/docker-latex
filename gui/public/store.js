@@ -15,6 +15,8 @@ let store = createStore(function (state = initState, action) {
         return Object.assign({}, state, {pageNum: action.page});
     case 'scale':
         return Object.assign({}, state, {scale: action.value});
+    case 'pdf':
+        return Object.assign({}, state, {pdf: action.pdf});
     default:
         return state;
     }

@@ -62,7 +62,7 @@ class Editor extends HTMLElement {
         editor.commands.addCommand({
             name: 'save',
             bindKey: {win: 'Ctrl-S', mac: 'Command-S'},
-            exec: this.save
+            exec: this.save.bind(this)
         });
     }
 

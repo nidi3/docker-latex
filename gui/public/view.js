@@ -1,5 +1,7 @@
 import {PDFJS} from "pdfjs-dist/build/pdf.combined.js";
-import {defineElement, bindHandlers, nop} from "./util";
+import {defineElement} from "./util";
+import {nextPage, lastPage, scale, setPage} from "./actions";
+import {compile} from "./template";
 import store from "./store";
 import watch from "redux-watch";
 
@@ -8,7 +10,7 @@ require('./view.scss');
 class View extends HTMLElement {
     constructor() {
         super();
-        this.innerHTML = '<div id="view"><canvas id="pdf"></canvas></div>';
+        compile(store, this, '<div id="view"><canvas id="pdf"></canvas></div>');
         this.view = this.querySelector('#view');
         this.canvas = this.querySelector('#pdf');
         window.onresize = this.renderPage;
@@ -19,7 +21,25 @@ class View extends HTMLElement {
         store.subscribe(watch(store.getState, 'scale')((value, old) => {
             this.renderPage();
         }));
-        this.onScaleChange = nop;
+    }
+
+    mapStateToProps(state) {
+        return {
+            pageNum: state.pageNum,
+            scale: state.scale,
+            pdf: state.pdf
+        };
+    }
+
+    mapDispatchToProps(dispatch) {
+        return {
+            loaded: (pdf) => {
+                dispatch({type: 'pdf', pdf: pdf});
+                if (this.props.pageNum > pdf.numPages) {
+                    dispatch(setPage(pdf.numPages));
+                }
+            }
+        };
     }
 
     viewWidth() {
@@ -36,6 +56,9 @@ class View extends HTMLElement {
         if (typeof scale === 'number') {
             return scale;
         }
+        if (!this.page) {
+            return 1;
+        }
         const view = this.page.view;
         switch (scale) {
         case 'page':
@@ -48,11 +71,9 @@ class View extends HTMLElement {
     }
 
     renderPage() {
-        const state = store.getState();
-        this.pdf.getPage(state.pageNum).then(p => {
+        this.props.pdf.getPage(this.props.pageNum).then(p => {
             this.page = p;
-            const factor = this.calcScale(state.scale);
-            this.onScaleChange(factor);
+            const factor = this.calcScale(this.props.scale);
             const viewport = this.page.getViewport(factor);
             this.canvas.width = viewport.width;
             this.canvas.height = viewport.height;
@@ -63,9 +84,8 @@ class View extends HTMLElement {
     }
 
     load() {
-        PDFJS.getDocument('/doc/main.pdf').then(p => {
-            this.pdf = p;
-            store.dispatch({type: 'set.page', page: Math.min(store.getState().pageNum, p.numPages)});
+        PDFJS.getDocument('/doc/main.pdf').then(pdf => {
+            this.dispatch.loaded(pdf);
             this.renderPage();
         });
     }
@@ -74,53 +94,49 @@ class View extends HTMLElement {
 class ViewControls extends HTMLElement {
     constructor() {
         super();
-        this.innerHTML = `
+        compile(store, this, `
 <div id="menu">
-    <button onclick="this.lastPage()">Last</button>
-    <button onclick="this.nextPage()">Next</button>
-    <button onclick="this.scale('page')">Scale fit</button>
-    <button onclick="this.scale('height')">Scale height</button>
-    <button onclick="this.scale('width')">Scale width</button>
-    <button onclick="this.zoomOut()">-</button>
-    <span id="zoom" class="view">100%</span>
-    <button onclick="this.zoomIn()">+</button>
+    <button (onclick)="this.lastPage()">Last</button>
+    <button (onclick)="this.nextPage()">Next</button>
+    <button (onclick)="this.scale('page')">Scale fit</button>
+    <button (onclick)="this.scale('height')">Scale height</button>
+    <button (onclick)="this.scale('width')">Scale width</button>
+    <button (onclick)="this.zoomOut()">-</button>
+    <span id="zoom" class="view">{Math.round(100*this.zoom)}%</span>
+    <button (onclick)="this.zoomIn()">+</button>
     <a href="/doc/main.pdf?download">Download</a>
 </div>
-`;
-        bindHandlers(this);
-
-        var zoom = this.querySelector('#zoom');
+`);
         document.addEventListener('DOMContentLoaded', () => {
             this.view = module.exports.find()[0];
-            this.view.onScaleChange = s => zoom.textContent = Math.round(s * 100) + "%";
         });
     }
 
-    nextPage() {
-        if (store.getState().pageNum < this.view.pdf.numPages) {
-            store.dispatch({type: 'next.page'});
-        }
+    mapStateToProps(state) {
+        return {
+            zoom: this.view.calcScale(state.scale),
+            pageNum: state.pageNum
+        };
     }
 
-    lastPage() {
-        if (store.getState().pageNum > 1) {
-            store.dispatch({type: 'prev.page'});
-        }
-    }
-
-    zoomIn() {
-        store.dispatch({type: 'scale', value: this.view.calcScale(store.getState().scale) * 1.2});
-    }
-
-    zoomOut() {
-        store.dispatch({type: 'scale', value: this.view.calcScale(store.getState().scale) / 1.2});
-    }
-
-    scale(value) {
-        store.dispatch({type: 'scale', value: value});
+    mapDispatchToProps(dispatch) {
+        return {
+            nextPage: () => {
+                if (this.props.pageNum < this.view.props.pdf.numPages) {
+                    dispatch(nextPage());
+                }
+            },
+            lastPage: () => {
+                if (this.props.pageNum > 1) {
+                    dispatch(lastPage());
+                }
+            },
+            zoomIn: () => dispatch(scale(this.props.zoom * 1.2)),
+            zoomOut: () => dispatch(scale(this.props.zoom / 1.2)),
+            scale: (value) => dispatch(scale(value))
+        };
     }
 }
-
 
 defineElement('latex-view-controls', ViewControls);
 
