@@ -1,8 +1,8 @@
-import editors from "./editor";
-import views from "./view";
-import logs from "./log";
+import editors from 'editor/editor';
+import views from 'view/view';
+import logs from 'log/log';
 
-require('./app.css');
+require('app.css');
 
 const log = logs.find()[0];
 const editor = editors.find()[0];

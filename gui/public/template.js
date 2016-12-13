@@ -1,4 +1,4 @@
-import {nop} from "./util";
+import {nop} from 'util';
 
 export default function compile(store, target, html) {
     const texts = [];

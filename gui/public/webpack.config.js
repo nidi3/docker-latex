@@ -11,6 +11,7 @@ module.exports = {
     },
     devtool: 'eval',
     resolve: {
+        root: path.resolve(__dirname),
         modules: [
             'node_modules'
         ]

@@ -1,8 +1,8 @@
-import {PDFJS} from "pdfjs-dist/build/pdf.combined.js";
-import {defineElement, observeStore} from "./util";
-import {nextPage, lastPage, scale, setPageNum, setPdf, setPage} from "./actions";
-import compile from "./template";
-import store from "./store";
+import {PDFJS} from 'pdfjs-dist/build/pdf.combined.js';
+import {defineElement, observeStore} from '../util';
+import {nextPage, lastPage, scale, setPageNum, setPdf, setPage} from '../actions';
+import compile from '../template';
+import store from '../store';
 
 require('./view.scss');
 

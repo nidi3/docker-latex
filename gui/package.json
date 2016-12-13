@@ -20,7 +20,6 @@
     "morgan": "~1.7.0",
     "pdfjs-dist": "^1.6.355",
     "redux": "^3.6.0",
-    "redux-watch": "^1.1.1",
     "request": "^2.79.0"
   },
   "devDependencies": {

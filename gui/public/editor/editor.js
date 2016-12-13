@@ -1,5 +1,5 @@
-import {completer,tokenLink} from "./editor-help";
-import {nop, defineElement} from "./util";
+import {completer, tokenLink} from './editor-help';
+import {nop, defineElement} from '../util';
 const Range = ace.require('ace/range').Range;
 require('./editor.scss');
 

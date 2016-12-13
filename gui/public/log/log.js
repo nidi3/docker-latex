@@ -1,5 +1,5 @@
 require('./log.scss');
-import {nop, defineElement} from "./util";
+import {nop, defineElement} from '../util';
 
 class Log extends HTMLElement {
 
